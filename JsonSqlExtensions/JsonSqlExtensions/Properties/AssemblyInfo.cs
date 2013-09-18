@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("JsonSqlExtensions.Tests")]
+[assembly: AssemblyTitle("JsonSqlExtensions")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("TP")]
-[assembly: AssemblyProduct("JsonSqlExtensions.Tests")]
+[assembly: AssemblyProduct("JsonSqlExtensions")]
 [assembly: AssemblyCopyright("Copyright © TP 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4e2579db-1af2-4de3-98ac-7e4b7921b0c6")]
+[assembly: Guid("d3c134d3-f6dc-446f-b1b4-2092fc982db2")]
 
 // Version information for an assembly consists of the following four values:
 //

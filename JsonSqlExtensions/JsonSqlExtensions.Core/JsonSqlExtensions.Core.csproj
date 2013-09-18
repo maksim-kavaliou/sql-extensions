@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{62DEB40B-05BF-4A47-8BF4-BF4378ECBCAD}</ProjectGuid>
+    <ProjectGuid>{5BC77DFA-F8CB-4907-94CE-30CF0DFD94A8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JsonSqlExtensions.Core</RootNamespace>
@@ -51,6 +51,7 @@
     <Compile Include="Newtonsoft.Json\Converters\DataTableConverter.cs" />
     <Compile Include="Newtonsoft.Json\Converters\DateTimeConverterBase.cs" />
     <Compile Include="Newtonsoft.Json\Converters\EntityKeyMemberConverter.cs" />
+    <Compile Include="Newtonsoft.Json\Converters\ExpandoObjectConverter.cs" />
     <Compile Include="Newtonsoft.Json\Converters\IsoDateTimeConverter.cs" />
     <Compile Include="Newtonsoft.Json\Converters\JavaScriptDateTimeConverter.cs" />
     <Compile Include="Newtonsoft.Json\Converters\JsonDateTimeSerializationMode.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Newtonsoft.Json\Serialization\JsonArrayContract.cs" />
     <Compile Include="Newtonsoft.Json\Serialization\JsonContract.cs" />
     <Compile Include="Newtonsoft.Json\Serialization\JsonDictionaryContract.cs" />
+    <Compile Include="Newtonsoft.Json\Serialization\JsonDynamicContract.cs" />
     <Compile Include="Newtonsoft.Json\Serialization\JsonFormatterConverter.cs" />
     <Compile Include="Newtonsoft.Json\Serialization\JsonISerializableContract.cs" />
     <Compile Include="Newtonsoft.Json\Serialization\JsonLinqContract.cs" />
@@ -161,7 +163,10 @@
     <Compile Include="Newtonsoft.Json\Utilities\ConvertUtils.cs" />
     <Compile Include="Newtonsoft.Json\Utilities\DateTimeUtils.cs" />
     <Compile Include="Newtonsoft.Json\Utilities\DictionaryWrapper.cs" />
+    <Compile Include="Newtonsoft.Json\Utilities\DynamicProxy.cs" />
+    <Compile Include="Newtonsoft.Json\Utilities\DynamicProxyMetaObject.cs" />
     <Compile Include="Newtonsoft.Json\Utilities\DynamicReflectionDelegateFactory.cs" />
+    <Compile Include="Newtonsoft.Json\Utilities\DynamicUtils.cs" />
     <Compile Include="Newtonsoft.Json\Utilities\DynamicWrapper.cs" />
     <Compile Include="Newtonsoft.Json\Utilities\EnumUtils.cs" />
     <Compile Include="Newtonsoft.Json\Utilities\EnumValue.cs" />

@@ -28,14 +28,7 @@ namespace JsonSqlExtensions.Core
 				}
 			}
 
-			try
-			{
-				return (string)propertyValue;
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
+			return propertyValue.ToString();
 		}
 	}
 }

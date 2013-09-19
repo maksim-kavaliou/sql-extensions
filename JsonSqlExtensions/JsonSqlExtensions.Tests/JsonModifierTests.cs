@@ -27,7 +27,7 @@ namespace JsonSqlExtensions.Tests
 		[TestCase("{\"impediment\":[]}", "{\"impediment\":[]}")]
 		public void ModifyCardSettingsCheck(string jsonString, string assertValue)
 		{
-			var result = JsonModifier.ModifyCardSettings(jsonString);
+			var result = JsonModifier.ModifyImpedimentCardSettings(jsonString);
 
 			Assert.That(result, Is.EqualTo(assertValue));
 		}

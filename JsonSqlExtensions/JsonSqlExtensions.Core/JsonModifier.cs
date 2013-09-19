@@ -31,7 +31,7 @@ namespace JsonSqlExtensions.Core
 		}
 
 		[SqlFunction]
-		public static string ModifyCardSettings(string jsonString)
+		public static string ModifyImpedimentCardSettings(string jsonString)
 		{
 			const string impediment = "impediment";
 			

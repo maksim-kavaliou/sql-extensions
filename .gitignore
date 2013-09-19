@@ -16,3 +16,4 @@ obj/
 *.ipr
 *.iws
 
+msbuild.log

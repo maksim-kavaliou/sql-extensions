@@ -39,6 +39,8 @@ namespace JsonSqlExtensions.Tests
 			if (!Path.IsPathRooted(assemblyPath))
 				assemblyPath = Path.Combine(Environment.CurrentDirectory, assemblyPath);
 
+			var assemblyName = Path.GetFileName(assemblyPath);
+
 			var builder = new StringBuilder();
 			builder.Append("0x");
 
@@ -54,7 +56,7 @@ namespace JsonSqlExtensions.Tests
 
 			var result = builder.ToString();
 
-			Assert.That(result, Is.Not.Null);
+			File.WriteAllText(string.Format("{0}.txt", assemblyName), result);
 		}
 	}
 }

@@ -10,15 +10,38 @@ namespace JsonSqlExtensions.Tests
 	[TestFixture]
 	public class JsonModifierTests
 	{
+		[TestCase("{\"id\":[[\"1\",\"2\"],[]]}", "id.[0]", "[\"1\",\"2\"]")]
+		[TestCase("{\"id\":[[\"1\",\"2\"],[]]}", "id.[1]", "[]")]
+		[TestCase("{\"id\":[[\"1\",\"2\"],[]]}", "id.[0].[0]", "1")]
+		[TestCase("{\"id\":[[\"1\",\"2\"],[]]}", "id.[0].[0].[0]", null)]
+		[TestCase("{\"id\":\"null\"}", "id", "null")]
+		[TestCase("{\"id\":null}", "id", "")]
 		[TestCase("{\"id\": \"1\", \"name\": \"maks\", \"address\": {\"street\": \"xsxsxs\", \"building\": \"4\"} }", "id", "1")]
 		[TestCase("{\"id\": \"1\", \"name\": \"maks\", \"address\": {\"street\": \"xsxsxs\", \"building\": \"4\"} }", "name", "maks")]
 		[TestCase("{\"id\": \"1\", \"name\": \"maks\", \"address\": {\"street\": \"xsxsxs\", \"building\": \"4\"} }", "address.building", "4")]
 		[TestCase("{\"id\": \"1\", \"name\": \"maks\", \"address\": {\"street\": \"xsxsxs\", \"building\": \"4\"} }", "address", "{\"street\":\"xsxsxs\",\"building\":\"4\"}")]
-		public void JsonModifier_ChangeProperty_Check(string jsonString, string propertyKey, string propertyAssertValue)
+		public void JsonModifier_GetJsonProperty_Check(string jsonString, string propertyKey, string propertyAssertValue)
 		{
 			var propertyValue = JsonModifier.GetJsonProperty(jsonString, propertyKey);
 
 			Assert.That(propertyValue, Is.EqualTo(propertyAssertValue));
+		}
+
+		[TestCase("{\"id\":\"2\"}", "id", "3", "{\"id\":\"3\"}")]
+		public void SetJsonProperty_Check(string initialJson, string propertyFullKey, string newValue, string assertValue)
+		{
+			var result = JsonModifier.SetJsonProperty(initialJson, propertyFullKey, newValue);
+
+			Assert.That(result, Is.EqualTo(assertValue));
+		}
+
+		[TestCase("id.as.[3]", "1234", "{\"id\":{\"as\":[null,null,null,\"1234\"]}}")]
+		[TestCase("id.as.[3].xx", "1234", "{\"id\":{\"as\":[null,null,null,{\"xx\":\"1234\"}]}}")]
+		public void BuildToken_Check(string fullKey, string value, string assertResult)
+		{
+			var result = JTokenBuilder.Build(fullKey, value);
+
+			Assert.That(result.ToJsonString(), Is.EqualTo(assertResult));
 		}
 
 		[TestCase("{\"impediment\":{\"l\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short\",\"alignment\":\"base\"},{\"id\":\"request_private\",\"alignment\":\"base\"},{\"id\":\"project_abbr\",\"alignment\":\"alt\"}],[{\"id\":\"entity_name_3lines\",\"alignment\":\"base\"}],[],[{\"id\":\"owner\",\"alignment\":\"alt\"},{\"id\":\"related_entity_short\",\"alignment\":\"alt\"}],[{\"id\":\"dependencies\",\"alignment\":\"base\"},{\"id\":\"business_value_short\",\"alignment\":\"base\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"userstory\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"create_date\",\"alignment\":\"alt\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"bug\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short_xs\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"effort_total\",\"alignment\":\"base\"}]]}}", "{\"impediment\":{\"l\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short\",\"alignment\":\"base\"},{\"id\":\"request_private\",\"alignment\":\"base\"},{\"id\":\"project_abbr\",\"alignment\":\"alt\"}],[{\"id\":\"entity_name_3lines\",\"alignment\":\"base\"}],[],[{\"id\":\"owner\",\"alignment\":\"alt\"},{\"id\":\"related_entity_short\",\"alignment\":\"alt\"}],[{\"id\":\"dependencies\",\"alignment\":\"base\"},{\"id\":\"business_value_short\",\"alignment\":\"base\"},{\"id\":\"responsible_person\",\"alignment\":\"base\"}]]},\"userstory\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"create_date\",\"alignment\":\"alt\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"bug\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short_xs\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"effort_total\",\"alignment\":\"base\"}]]}}")]
@@ -57,6 +80,17 @@ namespace JsonSqlExtensions.Tests
 			var result = builder.ToString();
 
 			File.WriteAllText(string.Format("{0}.txt", assemblyName), result);
+		}
+
+		[TestCase("asdf[0]", 0)]
+		[TestCase("assert.value[6]", 6)]
+		[TestCase("asdf[]", null)]
+		[TestCase("asdf", null)]
+		public void ParseArrayIndex_Check(string value, int? assertValue)
+		{
+			var result = JsonPathParser.ParseArrayIndex(value);
+
+			Assert.That(result, Is.EqualTo(assertValue));
 		}
 	}
 }

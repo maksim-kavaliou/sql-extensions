@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.SqlServer.Server;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace JsonSqlExtensions.Core
@@ -13,13 +11,20 @@ namespace JsonSqlExtensions.Core
 		{
 			JObject jsonObject = JObject.Parse(jsonString);
 
-			var propertiesKeys = propertyFullKey.Split('.').ToList();
+			var propertiesKeys = JsonPathParser.ParseFullJsonPropertyKey(propertyFullKey);
 
-			JToken propertyValue = jsonObject[propertiesKeys[0]];
+			JToken propertyValue = jsonObject;
 
-			for (int i = 1; i < propertiesKeys.Count; i++)
+			foreach (var propertyKey in propertiesKeys)
 			{
-				propertyValue = propertyValue[propertiesKeys[i]];
+				try
+				{
+					propertyValue = propertyValue[propertyKey];
+				}
+				catch (Exception)
+				{
+					return null;
+				}
 
 				if (propertyValue == null)
 				{
@@ -27,8 +32,40 @@ namespace JsonSqlExtensions.Core
 				}
 			}
 
-			return JTokenToString(propertyValue);
+			return propertyValue.ToJsonString();
 		}
+
+		public static string SetJsonProperty(string initialJson, string propertyFullKey, string newValue)
+		{
+			var newFormatedValue = string.Format("{{\"value\":\"{0}\"}}", newValue);
+
+			JToken newValueJsonObject = JObject.Parse(newFormatedValue)[Constants.Value];
+
+			JObject jsonObject = JObject.Parse(initialJson);
+
+			var propertiesKeys = JsonPathParser.ParseFullJsonPropertyKey(propertyFullKey);
+
+			JToken jsonElement = jsonObject;
+
+			for(int i = 0; i < propertiesKeys.Count; i++)
+			{
+				var propertyKey = propertiesKeys[i];
+
+				jsonElement = jsonElement[propertyKey];
+			}
+
+			jsonElement = newValueJsonObject;
+
+			return jsonObject.ToJsonString();
+		}
+
+		
+
+
+
+
+
+		
 
 		[SqlFunction]
 		public static string ModifyImpedimentCardSettings(string jsonString)
@@ -53,43 +90,12 @@ namespace JsonSqlExtensions.Core
 				jsonObject[impediment] = impedimentValue;
 			}
 
-			return JTokenToString(jsonObject);
+			return jsonObject.ToJsonString();
 		}
 
-		public static string JTokenToString(JToken jToken)
-		{
-			if (jToken == null)
-			{
-				return null;
-			}
+		
 
-			if (jToken is JObject || jToken is JArray)
-			{
-				return jToken.ToString(Formatting.None);
-			}
-
-			// if jToken is JValue or smth else
-			return jToken.ToString();
-		}
-
-		public static JToken ApplyStringToJToken(string content, JToken destination)
-		{
-			if (destination is JObject)
-			{
-				destination = JObject.Parse(content);
-			}
-			else if (destination is JArray)
-			{
-				destination = new JArray(content);
-			}
-			else
-			{
-				// destination is JValue
-				destination = content;
-			}
-
-			return destination;
-		}
+		
 
 		public static void ParseJArray(JToken jToken, Func<JToken, JToken> jTokenHanler)
 		{
@@ -120,11 +126,11 @@ namespace JsonSqlExtensions.Core
 			const string assignmentsBig2 = "assignments_big_2";
 			const string responsiblePerson = "responsible_person";
 
-			var stringValue = JTokenToString(jToken);
+			var stringValue = jToken.ToJsonString();
 
 			stringValue = stringValue.Replace(assignmentsBig2, responsiblePerson);
 
-			jToken = ApplyStringToJToken(stringValue, jToken);
+			jToken = jToken.ApplyStringContent(stringValue);
 
 			return jToken;
 		}

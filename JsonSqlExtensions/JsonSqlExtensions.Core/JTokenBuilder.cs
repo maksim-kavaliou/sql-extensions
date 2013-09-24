@@ -1,48 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace JsonSqlExtensions.Core
 {
 	public static class JTokenBuilder
 	{
-		public static JToken Build(string fullKey, string value)
+		public static JToken Build(string value)
 		{
-			var newFormatedValue = string.Format("{{\"value\":\"{0}\"}}", value);
+			JToken newValueJsonObject;
 
-			JToken newValueJsonObject = JObject.Parse(newFormatedValue)[Constants.Value];
-
-			var propertiesKeys = JsonPathParser.ParseFullJsonPropertyKey(fullKey);
-
-			return Build(propertiesKeys, newValueJsonObject);
-		}
-
-		public static JToken Build(IList<object> keys, JToken resultValue)
-		{
-			JToken result = resultValue;
-
-			for (int i = keys.Count - 1; i >= 0; i--)
+			try
 			{
-				var key = keys[i];
+				// JConvert allow to deserialize objects and arrays
+				object jsonObject = JsonConvert.DeserializeObject(value);
 
-				// build JObject
-				if (key is string)
-				{
-					result = new JObject(new JProperty((string)key, result));
-				}
-				else if (key is int?)
-				{
-					// build JArray
-					var index = (int)key;
-					var elements = new object[index + 1];
+				var jObject = JObject.FromObject(new {value = jsonObject});
 
-					elements[index] = result;
-
-					result = new JArray(elements);
-				}
-
+				newValueJsonObject = jObject[Constants.Value];
+			}
+			catch (Exception e)
+			{
+				// value is usual string
+				newValueJsonObject = new JValue(value);
 			}
 
-			return result;
+			return newValueJsonObject;
 		}
 	}
 }

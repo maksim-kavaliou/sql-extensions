@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyReaderTests.cs" />
     <Compile Include="JsonModifierTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -45,6 +46,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JsonSqlExtensions.AssemblyHexExtractor\JsonSqlExtensions.AssemblyHexExtractor.csproj">
+      <Project>{abf4d23b-0580-4f8a-8466-a6178349970c}</Project>
+      <Name>JsonSqlExtensions.AssemblyHexExtractor</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JsonSqlExtensions.Core\JsonSqlExtensions.Core.csproj">
       <Project>{5bc77dfa-f8cb-4907-94ce-30cf0dfd94a8}</Project>
       <Name>JsonSqlExtensions.Core</Name>

@@ -27,7 +27,15 @@ namespace JsonSqlExtensions.Tests
 			Assert.That(propertyValue, Is.EqualTo(propertyAssertValue));
 		}
 
-		[TestCase("{\"id\":\"2\"}", "id", "3", "{\"id\":\"3\"}")]
+		[TestCase(null, "id.as.[3]", "s1234", "{\"id\":{\"as\":[null,null,null,\"s1234\"]}}")]
+		[TestCase("", "id.as.[3].xx", "s1234", "{\"id\":{\"as\":[null,null,null,{\"xx\":\"s1234\"}]}}")]
+		[TestCase(null, "id.as.[3]", "{\"x\":\"1234\"}", "{\"id\":{\"as\":[null,null,null,{\"x\":\"1234\"}]}}")]
+		[TestCase(null, "id.as.[3]", "[\"x\",\"1234\"]", "{\"id\":{\"as\":[null,null,null,[\"x\",\"1234\"]]}}")]
+		[TestCase(null, "id.as.[3]", @"[""x"",""1234""]zxcz", "{\"id\":{\"as\":[null,null,null,\"[\\\"x\\\",\\\"1234\\\"]zxcz\"]}}")]
+		[TestCase("{\"id\":\"2\"}", "id", "3s", "{\"id\":\"3s\"}")]
+		[TestCase("{\"id\":\"2\"}", "name", "Alex", "{\"id\":\"2\",\"name\":\"Alex\"}")]
+		[TestCase("{\"id\":\"2\",\"name\":\"Alex\",\"address\":[{\"street\":\"XXX\"},{\"building\":\"22\"}]}", "address.[3].republic", "belarus", "{\"id\":\"2\",\"name\":\"Alex\",\"address\":[{\"street\":\"XXX\"},{\"building\":\"22\"},null,{\"republic\":\"belarus\"}]}")]
+		[TestCase("{\"id\":\"2\",\"name\":\"Alex\",\"address\":[{\"street\":\"XXX\"},{\"building\":\"22\"}]}", "country.[3].republic", "belarus", "{\"id\":\"2\",\"name\":\"Alex\",\"address\":[{\"street\":\"XXX\"},{\"building\":\"22\"}],\"country\":[null,null,null,{\"republic\":\"belarus\"}]}")]
 		public void SetJsonProperty_Check(string initialJson, string propertyFullKey, string newValue, string assertValue)
 		{
 			var result = JsonModifier.SetJsonProperty(initialJson, propertyFullKey, newValue);
@@ -35,51 +43,38 @@ namespace JsonSqlExtensions.Tests
 			Assert.That(result, Is.EqualTo(assertValue));
 		}
 
-		[TestCase("id.as.[3]", "1234", "{\"id\":{\"as\":[null,null,null,\"1234\"]}}")]
-		[TestCase("id.as.[3].xx", "1234", "{\"id\":{\"as\":[null,null,null,{\"xx\":\"1234\"}]}}")]
-		public void BuildToken_Check(string fullKey, string value, string assertResult)
+		[TestCase(
+			"{\"impediment\":{\"l\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short\",\"alignment\":\"base\"},{\"id\":\"request_private\",\"alignment\":\"base\"},{\"id\":\"project_abbr\",\"alignment\":\"alt\"}],[{\"id\":\"entity_name_3lines\",\"alignment\":\"base\"}],[],[{\"id\":\"owner\",\"alignment\":\"alt\"},{\"id\":\"related_entity_short\",\"alignment\":\"alt\"}],[{\"id\":\"dependencies\",\"alignment\":\"base\"},{\"id\":\"business_value_short\",\"alignment\":\"base\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"userstory\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"create_date\",\"alignment\":\"alt\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"bug\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short_xs\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"effort_total\",\"alignment\":\"base\"}]]}}",
+			"impediment",
+			"assignments_big_2",
+			"responsible_person",
+			"{\"impediment\":{\"l\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short\",\"alignment\":\"base\"},{\"id\":\"request_private\",\"alignment\":\"base\"},{\"id\":\"project_abbr\",\"alignment\":\"alt\"}],[{\"id\":\"entity_name_3lines\",\"alignment\":\"base\"}],[],[{\"id\":\"owner\",\"alignment\":\"alt\"},{\"id\":\"related_entity_short\",\"alignment\":\"alt\"}],[{\"id\":\"dependencies\",\"alignment\":\"base\"},{\"id\":\"business_value_short\",\"alignment\":\"base\"},{\"id\":\"responsible_person\",\"alignment\":\"base\"}]]},\"userstory\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"create_date\",\"alignment\":\"alt\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"bug\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short_xs\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"effort_total\",\"alignment\":\"base\"}]]}}"
+		)]
+		[TestCase(
+			"{\"impediment\":\"assignments_big_2\"}",
+			"impediment",
+			"assignments_big_2",
+			"responsible_person", 
+			"{\"impediment\":\"responsible_person\"}"
+		)]
+		[TestCase(
+			"{\"impediment\":[[\"11\",\"assignments_big_2\",[\"33\",\"44\"]],{\"id\":\"assignments_big_2\"},{\"id\":\"bla-bla-bla\"}]}",
+			"impediment",
+			"assignments_big_2",
+			"responsible_person", 
+			"{\"impediment\":[[\"11\",\"responsible_person\",[\"33\",\"44\"]],{\"id\":\"responsible_person\"},{\"id\":\"bla-bla-bla\"}]}"
+		)]
+		[TestCase("{\"impediment\":[]}",
+			"impediment",
+			"assignments_big_2",
+			"responsible_person", 
+			"{\"impediment\":[]}"
+		)]
+		public void ReplaceElementContent_Check(string jsonString, string propertyFullKey, string oldValue, string newValue, string assertValue)
 		{
-			var result = JTokenBuilder.Build(fullKey, value);
-
-			Assert.That(result.ToJsonString(), Is.EqualTo(assertResult));
-		}
-
-		[TestCase("{\"impediment\":{\"l\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short\",\"alignment\":\"base\"},{\"id\":\"request_private\",\"alignment\":\"base\"},{\"id\":\"project_abbr\",\"alignment\":\"alt\"}],[{\"id\":\"entity_name_3lines\",\"alignment\":\"base\"}],[],[{\"id\":\"owner\",\"alignment\":\"alt\"},{\"id\":\"related_entity_short\",\"alignment\":\"alt\"}],[{\"id\":\"dependencies\",\"alignment\":\"base\"},{\"id\":\"business_value_short\",\"alignment\":\"base\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"userstory\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"create_date\",\"alignment\":\"alt\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"bug\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short_xs\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"effort_total\",\"alignment\":\"base\"}]]}}", "{\"impediment\":{\"l\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short\",\"alignment\":\"base\"},{\"id\":\"request_private\",\"alignment\":\"base\"},{\"id\":\"project_abbr\",\"alignment\":\"alt\"}],[{\"id\":\"entity_name_3lines\",\"alignment\":\"base\"}],[],[{\"id\":\"owner\",\"alignment\":\"alt\"},{\"id\":\"related_entity_short\",\"alignment\":\"alt\"}],[{\"id\":\"dependencies\",\"alignment\":\"base\"},{\"id\":\"business_value_short\",\"alignment\":\"base\"},{\"id\":\"responsible_person\",\"alignment\":\"base\"}]]},\"userstory\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"create_date\",\"alignment\":\"alt\"},{\"id\":\"assignments_big_2\",\"alignment\":\"base\"}]]},\"bug\":{\"m\":[[{\"id\":\"general_entity_id\",\"alignment\":\"base\"},{\"id\":\"tags_short_xs\",\"alignment\":\"base\"},{\"id\":\"impediments\",\"alignment\":\"alt\"}],[],[{\"id\":\"effort_total\",\"alignment\":\"base\"}]]}}")]
-		[TestCase("{\"impediment\":\"assignments_big_2\"}", "{\"impediment\":\"responsible_person\"}")]
-		[TestCase("{\"impediment\":[[\"11\",\"assignments_big_2\",[\"33\",\"44\"]],{\"id\":\"assignments_big_2\"},{\"id\":\"bla-bla-bla\"}]}", "{\"impediment\":[[\"11\",\"responsible_person\",[\"33\",\"44\"]],{\"id\":\"responsible_person\"},{\"id\":\"bla-bla-bla\"}]}")]
-		[TestCase("{\"impediment\":[]}", "{\"impediment\":[]}")]
-		public void ModifyCardSettingsCheck(string jsonString, string assertValue)
-		{
-			var result = JsonModifier.ModifyImpedimentCardSettings(jsonString);
+			var result = JsonModifier.ReplaceElementContent(jsonString, propertyFullKey, oldValue, newValue);
 
 			Assert.That(result, Is.EqualTo(assertValue));
-		}
-
-		[TestCase(@"d:\Development\SqlExtensions\sql-extensions\JsonSqlExtensions\JsonSqlExtensions.Core\bin\Debug\JsonSqlExtensions.Core.dll")]
-		[TestCase(@"d:\Development\SqlExtensions\sql-extensions\JsonSqlExtensions\JsonSqlExtensions.StrongNameSign\bin\Debug\JsonSqlExtensions.StrongNameSign.dll")]
-		public void GetHexString(string assemblyPath)
-		{
-			if (!Path.IsPathRooted(assemblyPath))
-				assemblyPath = Path.Combine(Environment.CurrentDirectory, assemblyPath);
-
-			var assemblyName = Path.GetFileName(assemblyPath);
-
-			var builder = new StringBuilder();
-			builder.Append("0x");
-
-			using (var stream = new FileStream(assemblyPath, FileMode.Open, FileAccess.Read, FileShare.Read))
-			{
-				int currentByte = stream.ReadByte();
-				while (currentByte > -1)
-				{
-					builder.Append(currentByte.ToString("X2", CultureInfo.InvariantCulture));
-					currentByte = stream.ReadByte();
-				}
-			}
-
-			var result = builder.ToString();
-
-			File.WriteAllText(string.Format("{0}.txt", assemblyName), result);
 		}
 
 		[TestCase("asdf[0]", 0)]
